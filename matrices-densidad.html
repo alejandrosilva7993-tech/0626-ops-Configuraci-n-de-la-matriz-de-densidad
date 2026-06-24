@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrices de densidad</title>
+  <link href="https://unpkg.com/primeng@17.18.0/resources/themes/lara-light-blue/theme.css" rel="stylesheet">
+  <link href="https://unpkg.com/primeicons@7.0.0/primeicons.css" rel="stylesheet" crossorigin="anonymous">
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-color-text: #ffffff;
+      --primary-50: #f5f9ff;
+      --primary-100: #d0e1fd;
+      --text-color: #4b5563;
+      --text-color-secondary: #6b7280;
+      --text-heading: #374151;
+      --surface-border: #dfe7ef;
+      --surface-50: #f9fafb;
+      --surface-100: #f3f4f6;
+      --surface-200: #e5e7eb;
+      --surface-300: #d1d5db;
+      --surface-700: #374151;
+      --surface-hover: #f6f9fc;
+      --breadcrumb-link: #3b82f6;
+      --breadcrumb-link-hover: #2563eb;
+      --breadcrumb-muted: #6b7280;
+      --btn-cancel: #8b9299;
+      --btn-success: #669b37;
+      --section-gap: 1rem;
+      --table-head-bg: var(--surface-50);
+      --table-head-text: var(--surface-700);
+      --table-border: var(--surface-200);
+      --matrix-accent: var(--primary-color);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      background: #fff;
+      color: var(--text-color);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .pi {
+      font-style: normal;
+      display: inline-block;
+      min-width: 1em;
+      line-height: 1;
+    }
+
+    .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .page-content {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2.5rem;
+    }
+    .page-content--wide { max-width: 1280px; }
+
+    .breadcrumb { font-size: 0.875rem; color: var(--breadcrumb-muted); margin-bottom: 0.75rem; }
+    .breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; list-style: none; }
+    .breadcrumb li + li::before { content: "/"; margin-right: 0.35rem; color: var(--breadcrumb-muted); }
+    .breadcrumb a { color: var(--breadcrumb-link); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--breadcrumb-link-hover); text-decoration: underline; }
+    .breadcrumb li[aria-current="page"] { color: var(--breadcrumb-muted); }
+
+    .page-title { font-size: 1.8rem; font-weight: 600; color: var(--text-heading); margin-bottom: 1.25rem; }
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .form-section { margin-bottom: 2rem; }
+    .section-head {
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--surface-200);
+    }
+    .section-title { font-size: 1.05rem; font-weight: 600; color: #334155; margin: 0; }
+
+    .form-grid { display: grid; gap: 1.25rem 1.5rem; }
+    .form-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .form-grid--header {
+      grid-template-columns: repeat(2, minmax(12rem, 16rem));
+      width: fit-content;
+      max-width: 100%;
+    }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+    .field-label { font-size: 0.875rem; font-weight: 500; color: var(--text-color); }
+    .field-error { font-size: 0.75rem; color: #dc2626; }
+
+    .form-input {
+      width: 100%;
+      min-height: 2.25rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text-color);
+      font-family: inherit;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-100);
+    }
+    .form-input[readonly] { background: #f8fafc; color: var(--text-color-secondary); }
+    .form-input.is-interactive { cursor: text; }
+    .form-input.invalid { border-color: #dc2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12); }
+
+    .form-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+    .btn {
+      padding: 0.5rem 1.1rem;
+      min-height: 2.25rem;
+      border: 1px solid var(--surface-300);
+      background: #fff;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+    }
+    .btn-secondary { background: var(--btn-cancel); color: #fff; border-color: var(--btn-cancel); }
+    .btn-success { background: var(--btn-success); color: #fff; border-color: var(--btn-success); }
+    .btn-primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); font-weight: 600; }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
+    .btn-outlined {
+      background: #fff;
+      color: #495057;
+      border-color: #ced4da;
+      font-weight: 500;
+    }
+    .btn-outlined:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--surface-200);
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 40;
+    }
+    .table-toolbar__left, .table-toolbar__right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .table-toolbar__left { gap: 0.5rem; }
+
+    .btn-toolbar-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.15rem;
+      border: none;
+      background: transparent;
+      color: #334155;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      line-height: 1.2;
+    }
+    .btn-toolbar-text:hover { color: #1e293b; }
+    .btn-toolbar-text .pi { font-size: 0.95rem; color: #64748b; }
+    .btn-icon-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary-color);
+    }
+    .btn-icon-action:hover { background: #2563eb; }
+
+    .column-picker { position: relative; }
+    .column-picker__panel {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      right: 0;
+      left: auto;
+      min-width: 240px;
+      background: #fff;
+      border: 1px solid var(--surface-200);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      padding: 0.65rem 0;
+      z-index: 50;
+    }
+    .column-picker__panel.hidden { display: none; }
+    .column-picker__title {
+      padding: 0 0.85rem 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .column-picker__item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    .column-picker__item:hover { background: #f8fafc; }
+    .column-picker__item input { accent-color: var(--primary-color); }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-top: var(--section-gap);
+    }
+    .data-table-scroll-pane { width: 100%; overflow-x: auto; }
+    .data-table { border-collapse: collapse; font-size: 0.8125rem; width: 100%; min-width: 900px; table-layout: fixed; }
+    .data-table th, .data-table td {
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--table-border);
+      vertical-align: middle;
+    }
+    .data-table thead tr.header-row { background: var(--table-head-bg); }
+    .data-table thead tr.header-row th {
+      font-weight: 700;
+      color: var(--table-head-text);
+      font-size: 0.8125rem;
+      border-bottom: 1px solid var(--table-border);
+    }
+    .data-table thead tr.filter-row { background: var(--table-head-bg); border-bottom: 1px solid var(--table-border); }
+    .data-table thead tr.filter-row th { padding: 4px 8px 8px; font-weight: 400; }
+    .table-filter-input {
+      width: 100%;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid var(--surface-300);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.8125rem;
+    }
+    .table-filter-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-100);
+    }
+    .data-table tbody tr { background: #fff; color: var(--text-color); }
+    .data-table tbody tr:nth-child(even) { background: var(--surface-50); }
+    .data-table tbody tr:hover td { background: var(--surface-hover); }
+    .data-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table td.col-actions { overflow: visible; width: 120px; }
+    .col-hidden { display: none !important; }
+
+    .row-actions { display: flex; align-items: center; gap: 0.15rem; }
+    .table-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+    .table-action-btn:hover { background: var(--primary-50); }
+    .table-action-btn--danger { color: #dc2626; }
+    .table-action-btn--danger:hover { background: #fef2f2; }
+
+    .table-paginator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-top: 1px solid var(--table-border);
+      background: #fff;
+    }
+    .table-paginator__cluster { display: inline-flex; align-items: center; gap: 0.15rem; }
+    .table-paginator__pages { display: inline-flex; align-items: center; gap: 0.15rem; }
+    .table-pag-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .table-pag-btn:hover:not(:disabled) { background: #f1f5f9; color: #334155; }
+    .table-pag-btn.is-active { background: var(--primary-50); color: var(--primary-color); font-weight: 600; }
+    .table-pag-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+    .table-paginator__select {
+      height: 1.75rem;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      padding: 0 0.5rem;
+      margin-left: 0.5rem;
+    }
+
+    .info-callout,
+    .limit-preview,
+    .density-legend {
+      padding: 0.65rem 0.85rem;
+      background: var(--surface-50);
+      border: 1px solid var(--table-border);
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      color: var(--text-color-secondary);
+    }
+    .info-callout { margin-bottom: 1rem; }
+    .info-callout p { margin: 0; }
+    .limit-preview { margin-top: 0.65rem; color: var(--text-color); }
+    .limit-preview.invalid { background: #fef2f2; border-color: #fecaca; }
+    .limit-preview.invalid .limit-preview__title { color: #991b1b; }
+    .limit-preview__title,
+    .density-legend__title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--surface-700);
+      margin-bottom: 0.4rem;
+    }
+    .limit-preview__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 1.5rem;
+    }
+    .limit-preview__item { font-size: 0.8125rem; line-height: 1.4; }
+    .limit-preview__item strong { font-weight: 600; color: var(--surface-700); }
+    .limit-preview__item span { color: var(--text-color); font-variant-numeric: tabular-nums; }
+    .density-legend ul { margin: 0; padding-left: 1.15rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.35rem 1.5rem; color: var(--text-color); }
+    .density-legend { margin-bottom: 0.75rem; }
+
+    .density-block { margin-bottom: 1.5rem; }
+    .density-block__head { margin-bottom: 0.75rem; }
+    .density-block__title { font-size: 0.9375rem; font-weight: 600; color: #334155; }
+    .density-block__unit { font-size: 0.8125rem; color: var(--text-color-secondary); }
+    .unit-cubic sup {
+      font-size: 0.62em;
+      vertical-align: super;
+      line-height: 0;
+      font-weight: 600;
+    }
+
+    .matrix-badge {
+      flex-shrink: 0;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      background: var(--primary-color);
+      color: var(--primary-color-text);
+      border: none;
+    }
+
+    .limit-sequence {
+      border: 1px solid var(--table-border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .limit-sequence__head {
+      display: grid;
+      grid-template-columns: minmax(8rem, 1.2fr) minmax(9rem, 1fr) minmax(10rem, 1.1fr);
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--table-head-bg);
+      color: var(--table-head-text);
+      border-bottom: 1px solid var(--table-border);
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .limit-row {
+      display: grid;
+      grid-template-columns: minmax(8rem, 1.2fr) minmax(9rem, 1fr) minmax(10rem, 1.1fr);
+      gap: 0.75rem;
+      align-items: start;
+      padding: 0.65rem 0.85rem;
+      border-top: 1px solid var(--table-border);
+      background: #fff;
+      color: var(--text-color);
+    }
+    .limit-row:nth-child(odd) { background: var(--surface-50); }
+    .limit-row:hover { background: var(--surface-hover); }
+    .limit-row.invalid { background: #fef2f2; }
+    .limit-row__label { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; font-weight: 600; color: var(--surface-700); min-height: 2rem; }
+    .limit-row__badge {
+      width: 1.35rem;
+      height: 1.35rem;
+      font-size: 0.68rem;
+    }
+    .limit-row__min { font-size: 0.8125rem; color: var(--text-color-secondary); min-height: 2rem; display: flex; align-items: center; }
+    .limit-row__max { display: flex; flex-direction: column; gap: 0.25rem; }
+    .limit-row__max-field { display: flex; align-items: center; gap: 0.4rem; }
+    .limit-row__max-field .form-input { min-height: 2rem; font-size: 0.8125rem; padding: 0.3rem 0.5rem; flex: 1; max-width: 8rem; }
+    .limit-row__max-field .form-input[readonly] { background: #f1f5f9; color: #64748b; pointer-events: none; }
+    .limit-row__unit { font-size: 0.72rem; color: var(--text-color-secondary); }
+    .limit-row__error { font-size: 0.72rem; color: #dc2626; }
+
+    .density-grid-wrap { overflow-x: auto; border: 1px solid var(--table-border); border-radius: 6px; background: #fff; }
+    .density-grid { display: grid; grid-template-columns: 9.5rem repeat(5, minmax(4.5rem, 1fr)); min-width: 640px; }
+    .density-grid__corner, .density-grid__col-head, .density-grid__row-head, .density-grid__cell {
+      padding: 0.55rem 0.45rem; border-bottom: 1px solid var(--table-border); border-right: 1px solid var(--table-border);
+      display: flex; align-items: center; justify-content: center; text-align: center; min-height: 2.75rem;
+    }
+    .density-grid__corner {
+      background: var(--table-head-bg);
+      color: var(--table-head-text);
+      font-size: 0.875rem;
+      font-weight: 700;
+      line-height: 1.25;
+      justify-content: flex-start;
+      padding-left: 0.65rem;
+    }
+    .density-grid__col-head {
+      background: var(--table-head-bg);
+      color: var(--table-head-text);
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .density-grid__col-head small { font-size: 0.68rem; font-weight: 500; color: var(--text-color-secondary); opacity: 1; }
+    .density-grid__head-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      line-height: 1.2;
+    }
+    .density-grid__badge {
+      width: 1.25rem;
+      height: 1.25rem;
+      font-size: 0.65rem;
+    }
+    .density-grid__row-head {
+      background: var(--table-head-bg);
+      color: var(--surface-700);
+      font-size: 0.75rem;
+      font-weight: 600;
+      justify-content: flex-start;
+      padding-left: 0.65rem;
+    }
+    .density-grid__cell { background: #fff; padding: 0.35rem; }
+    .density-grid__cell .form-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-100);
+    }
+    .density-grid__cell .form-input { min-height: 2rem; max-width: 3.5rem; margin: 0 auto; text-align: center; font-weight: 600; padding: 0.25rem; }
+    .density-grid__cell .form-input.invalid { border-color: #dc2626; }
+    .readonly-matrix .form-input { pointer-events: none; background: var(--surface-50); }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-item__label { font-size: 0.75rem; color: var(--text-color-secondary); margin-bottom: 0.2rem; }
+    .meta-item__value { font-size: 0.875rem; font-weight: 500; color: #334155; }
+
+    .view-hidden { display: none !important; }
+    .hidden { display: none !important; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 1200;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: #fff; border-radius: 8px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+      width: 100%; max-width: 420px; padding: 1.25rem;
+    }
+    .modal-card--wide { max-width: 480px; }
+    .modal-card__title { font-size: 1rem; font-weight: 600; color: #334155; margin-bottom: 0.75rem; }
+    .modal-card__body { font-size: 0.875rem; color: var(--text-color); margin-bottom: 1.25rem; line-height: 1.5; }
+    .modal-card__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+    .export-format-list { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+    .export-format-list label {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem;
+    }
+    .export-format-list label:hover { background: #f8fafc; }
+
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1300;
+      background: #1e293b; color: #f8fafc; padding: 0.85rem 1.1rem; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); max-width: 420px; font-size: 0.85rem;
+    }
+    .toast.hidden { display: none; }
+
+    .page-footer {
+      margin-top: auto; padding: 0.65rem 1rem; text-align: center;
+      font-size: 0.8rem; color: #9ca3af; background: #f3f4f6; border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid--2, .meta-grid { grid-template-columns: 1fr; }
+      .form-grid--header { width: 100%; max-width: 20rem; }
+      .density-legend ul { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page-content { padding: 1rem; }
+      .limit-sequence__head { display: none; }
+      .limit-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <main class="page-content" id="mainContent">
+
+      <!-- LISTADO -->
+      <div id="listView">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#">Catálogos</a></li>
+            <li aria-current="page">Matrices de densidad</li>
+          </ol>
+        </nav>
+        <div class="page-header-row">
+          <h1 class="page-title" style="margin-bottom:0">Matrices de densidad</h1>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="table-toolbar__left">
+            <button type="button" class="btn btn-primary" id="goCreateBtn">
+              <i class="pi pi-plus-circle" aria-hidden="true"></i> Crear matriz de densidad
+            </button>
+            <button type="button" class="btn btn-outlined" id="exportBtn">
+              <i class="pi pi-download" aria-hidden="true"></i> Exportar registros
+            </button>
+          </div>
+          <div class="table-toolbar__right">
+            <div class="column-picker">
+              <button type="button" class="btn-toolbar-text" id="columnToggleBtn" aria-expanded="false" aria-controls="columnPickerPanel">
+                <i class="pi pi-eye-slash" aria-hidden="true"></i> Columnas
+              </button>
+              <div id="columnPickerPanel" class="column-picker__panel hidden" role="dialog" aria-label="Columnas visibles"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="data-table-scroll-pane">
+            <table class="data-table" id="listTable">
+              <thead>
+                <tr class="header-row" id="listTableHead"></tr>
+                <tr class="filter-row" id="listTableFilterRow"></tr>
+              </thead>
+              <tbody id="listTableBody"></tbody>
+            </table>
+          </div>
+          <nav class="table-paginator" aria-label="Paginación">
+            <div class="table-paginator__cluster">
+              <button type="button" class="table-pag-btn" id="pagFirst" aria-label="Primera página"><i class="pi pi-angle-double-left"></i></button>
+              <button type="button" class="table-pag-btn" id="pagPrev" aria-label="Página anterior"><i class="pi pi-angle-left"></i></button>
+              <div class="table-paginator__pages" id="pagPages"></div>
+              <button type="button" class="table-pag-btn" id="pagNext" aria-label="Página siguiente"><i class="pi pi-angle-right"></i></button>
+              <button type="button" class="table-pag-btn" id="pagLast" aria-label="Última página"><i class="pi pi-angle-double-right"></i></button>
+              <select id="pageSizeSelect" class="table-paginator__select" aria-label="Registros por página">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- CREAR -->
+      <div id="createView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Matrices de densidad</a></li>
+            <li aria-current="page">Crear matriz de densidad</li>
+          </ol>
+        </nav>
+        <h1 class="page-title">Crear matriz de densidad</h1>
+        <div id="createFormRoot"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-nav="list">Cancelar</button>
+          <button type="button" class="btn btn-success" id="createSubmitBtn">Crear</button>
+        </div>
+      </div>
+
+      <!-- EDITAR -->
+      <div id="editView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Matrices de densidad</a></li>
+            <li aria-current="page" id="editBreadcrumbCurrent">Actualizar matriz</li>
+          </ol>
+        </nav>
+        <h1 class="page-title" id="editPageTitle">Actualizar matriz</h1>
+        <div id="editFormRoot"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-nav="list">Cancelar</button>
+          <button type="button" class="btn btn-success" id="editSubmitBtn">Actualizar</button>
+        </div>
+      </div>
+
+      <!-- DETALLE -->
+      <div id="detailView" class="view-hidden">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="#" data-nav="list">Catálogos</a></li>
+            <li><a href="#" data-nav="list">Matrices de densidad</a></li>
+            <li aria-current="page" id="detailBreadcrumbCurrent">Detalle de matriz</li>
+          </ol>
+        </nav>
+        <h1 class="page-title" id="detailPageTitle">Detalle de matriz</h1>
+        <div id="detailFormRoot"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-nav="list">Volver al listado</button>
+        </div>
+      </div>
+
+    </main>
+    <footer class="page-footer">3.35.134 ©Netlogistik 2026</footer>
+  </div>
+
+  <!-- Modal eliminar MSG004 -->
+  <div id="deleteModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card">
+      <div class="modal-card__title" id="deleteModalTitle">Confirmar eliminación</div>
+      <div class="modal-card__body" id="deleteModalBody">¿Desea eliminar la matriz de densidad seleccionada?</div>
+      <div class="modal-card__actions">
+        <button type="button" class="btn btn-secondary" id="deleteCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="deleteConfirmBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal exportar -->
+  <div id="exportModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-card__title" id="exportModalTitle">Exportar registros</div>
+      <div class="modal-card__body">Seleccione el tipo de archivo para la exportación:</div>
+      <div class="export-format-list" id="exportFormatList"></div>
+      <div class="modal-card__actions">
+        <button type="button" class="btn btn-secondary" id="exportCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="exportConfirmBtn">Exportar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = 'densityMatricesCatalog';
+      var CURRENT_USER = 'admin.wms';
+      var LIMIT_FORMAT = /^\d{1,7}(\.\d{1,3})?$/;
+      var ID_FORMAT = /^[A-Za-z0-9_-]{1,50}$/;
+      var VOLUME_UNIT = '<span class="unit-cubic">m<sup>3</sup></span>';
+
+      var VOLUME_DEF = [
+        { id: 'mini', label: 'Mini', index: 1, max: '0.008', maxFixed: false, minFixed: true },
+        { id: 'pequeno', label: 'Pequeño', index: 2, max: '0.030', maxFixed: false, minFixed: false },
+        { id: 'mediano', label: 'Mediano', index: 3, max: '0.060', maxFixed: false, minFixed: false },
+        { id: 'grande', label: 'Grande', index: 4, max: '0.120', maxFixed: false, minFixed: false },
+        { id: 'extra', label: 'Extra grande', index: 5, max: 'Infinito', maxFixed: true, minFixed: false }
+      ];
+      var WEIGHT_DEF = [
+        { id: 'muy-ligero', label: 'Muy ligero', index: 1, max: '0.500', maxFixed: false, minFixed: true },
+        { id: 'ligero', label: 'Ligero', index: 2, max: '2.000', maxFixed: false, minFixed: false },
+        { id: 'promedio', label: 'Promedio', index: 3, max: '5.000', maxFixed: false, minFixed: false },
+        { id: 'pesado', label: 'Pesado', index: 4, max: '10.000', maxFixed: false, minFixed: false },
+        { id: 'muy-pesado', label: 'Muy pesado', index: 5, max: 'Infinito', maxFixed: true, minFixed: false }
+      ];
+      var DENSITY_DEFAULT = [
+        [9, 8, 7, 6, 5],
+        [8, 7, 6, 5, 4],
+        [7, 6, 5, 4, 3],
+        [6, 5, 4, 3, 2],
+        [5, 4, 3, 2, 1]
+      ];
+
+      var EXPORT_FORMATS = [
+        { id: 'html', label: 'HTML' },
+        { id: 'csv', label: 'CSV' },
+        { id: 'text', label: 'Text' },
+        { id: 'pdf', label: 'PDF' },
+        { id: 'xls', label: 'Excel 95 +' },
+        { id: 'xlsx', label: 'Excel 2007 +' }
+      ];
+
+      var COLUMNS = [
+        { key: 'id', label: 'Identificador de la matriz', visible: true },
+        { key: 'nombre', label: 'Nombre', visible: true },
+        { key: 'updatedBy', label: 'Actualizado por', visible: true },
+        { key: 'updatedAt', label: 'Actualizado', visible: true },
+        { key: 'createdAt', label: 'Creado', visible: true }
+      ];
+
+      var listState = { filters: {}, page: 1, pageSize: 10 };
+      var editingId = null;
+      var deletingId = null;
+      var selectedExportFormat = 'csv';
+      var matrixInstances = {};
+
+      function cloneDeep(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+      function defaultMatrixData() {
+        return {
+          volume: VOLUME_DEF.map(function (c) { return { id: c.id, max: c.max }; }),
+          weight: WEIGHT_DEF.map(function (c) { return { id: c.id, max: c.max }; }),
+          density: cloneDeep(DENSITY_DEFAULT)
+        };
+      }
+
+      function seedRecords() {
+        var names = [
+          'Matriz estándar dona', 'Matriz regional norte', 'Matriz CD México',
+          'Matriz exportación', 'Matriz refrigerados', 'Matriz alto volumen',
+          'Matriz compacta', 'Matriz prueba QA', 'Matriz legacy 2024', 'Matriz piloto WMS'
+        ];
+        var users = ['jperez', 'mlopez', 'admin.wms', 'rgarcia', 'acastillo'];
+        var records = [];
+        for (var i = 0; i < 10; i++) {
+          var d = new Date(2026, 0, 5 + i * 3, 9 + i, 15, 0);
+          var u = new Date(2026, 5, 1 + i, 14, 30, 0);
+          records.push({
+            id: 'MAT-DON-' + String(i + 1).padStart(2, '0'),
+            nombre: names[i],
+            volume: cloneDeep(defaultMatrixData().volume),
+            weight: cloneDeep(defaultMatrixData().weight),
+            density: cloneDeep(DENSITY_DEFAULT),
+            updatedBy: users[i % users.length],
+            updatedAt: u.toISOString(),
+            createdAt: d.toISOString(),
+            deleted: false,
+            auditLog: []
+          });
+        }
+        return records;
+      }
+
+      var Store = {
+        load: function () {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+              var seed = seedRecords();
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+              return seed;
+            }
+            return JSON.parse(raw);
+          } catch (e) {
+            return seedRecords();
+          }
+        },
+        saveAll: function (records) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        },
+        getActive: function () {
+          return Store.load().filter(function (r) { return !r.deleted; });
+        },
+        getById: function (id) {
+          return Store.load().find(function (r) { return r.id === id && !r.deleted; }) || null;
+        },
+        idExists: function (id, excludeId) {
+          return Store.load().some(function (r) {
+            return !r.deleted && r.id === id && (!excludeId || r.id !== excludeId);
+          });
+        },
+        create: function (record) {
+          var all = Store.load();
+          all.push(record);
+          Store.saveAll(all);
+        },
+        update: function (id, patch) {
+          var all = Store.load();
+          var idx = all.findIndex(function (r) { return r.id === id; });
+          if (idx === -1) return null;
+          all[idx] = Object.assign({}, all[idx], patch);
+          Store.saveAll(all);
+          return all[idx];
+        },
+        softDelete: function (id) {
+          return Store.update(id, { deleted: true });
+        }
+      };
+
+      function formatDateTime(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleString('es-MX', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        });
+      }
+
+      function showToast(msg) {
+        var el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(function () { el.classList.add('hidden'); }, 3500);
+      }
+
+      function showView(name) {
+        var views = ['listView', 'createView', 'editView', 'detailView'];
+        views.forEach(function (v) {
+          document.getElementById(v).classList.toggle('view-hidden', v !== name + 'View');
+        });
+        var main = document.getElementById('mainContent');
+        main.classList.toggle('page-content--wide', name !== 'list');
+        if (name === 'list') renderList();
+      }
+
+      function densityGridHeadLabel(label, index) {
+        return '<span class="density-grid__head-label">' +
+          '<span class="density-grid__badge matrix-badge" aria-hidden="true">' + index + '</span>' +
+          '<span>' + label + '</span></span>';
+      }
+
+      /* ---- DensityMatrixForm module ---- */
+      function DensityMatrixForm(prefix, mode) {
+        this.prefix = prefix;
+        this.mode = mode === 'readonly' ? 'readonly' : 'edit';
+        this.volume = cloneDeep(VOLUME_DEF);
+        this.weight = cloneDeep(WEIGHT_DEF);
+        this.density = cloneDeep(DENSITY_DEFAULT);
+      }
+
+      DensityMatrixForm.prototype.mount = function (root, options) {
+        options = options || {};
+        var p = this.prefix;
+        var readonly = this.mode === 'readonly';
+        root.innerHTML =
+          '<section class="form-section">' +
+            '<div class="section-head"><h2 class="section-title">Información general</h2></div>' +
+            '<div class="form-grid form-grid--2 form-grid--header">' +
+              '<div class="field">' +
+                '<label class="field-label" for="' + p + '-id">Identificador<span aria-hidden="true">*</span></label>' +
+                '<input id="' + p + '-id" type="text" class="form-input' + (readonly || options.idReadonly ? '' : ' is-interactive') + '" maxlength="50" ' + (readonly || options.idReadonly ? 'readonly' : '') + '>' +
+                '<span class="field-error" id="' + p + '-id-error" hidden></span>' +
+              '</div>' +
+              '<div class="field">' +
+                '<label class="field-label" for="' + p + '-nombre">Nombre<span aria-hidden="true">*</span></label>' +
+                '<input id="' + p + '-nombre" type="text" class="form-input' + (readonly ? '' : ' is-interactive') + '" maxlength="50" ' + (readonly ? 'readonly' : '') + '>' +
+                '<span class="field-error" id="' + p + '-nombre-error" hidden></span>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+          (options.showMeta ? (
+            '<div class="meta-grid" id="' + p + '-meta">' +
+              '<div class="meta-item"><div class="meta-item__label">Actualizado por</div><div class="meta-item__value" id="' + p + '-updatedBy"></div></div>' +
+              '<div class="meta-item"><div class="meta-item__label">Actualizado</div><div class="meta-item__value" id="' + p + '-updatedAt"></div></div>' +
+              '<div class="meta-item"><div class="meta-item__label">Creado</div><div class="meta-item__value" id="' + p + '-createdAt"></div></div>' +
+            '</div>'
+          ) : '') +
+          '<section class="form-section' + (readonly ? ' readonly-matrix' : '') + '">' +
+            '<div class="section-head"><h2 class="section-title">Matriz</h2></div>' +
+            '<div class="info-callout" role="note"><p>Cada modificación a la matriz no será retroactiva; solo aplicará para armados posteriores a su configuración.</p></div>' +
+            '<div class="density-block"><div class="density-block__head"><h3 class="density-block__title">Volumen (' + VOLUME_UNIT + ')</h3></div>' +
+              '<div id="' + p + '-volume-limits" class="limit-sequence"></div>' +
+              '<div id="' + p + '-volume-preview" class="limit-preview"></div></div>' +
+            '<div class="density-block"><div class="density-block__head"><h3 class="density-block__title">Peso (kg)</h3></div>' +
+              '<div id="' + p + '-weight-limits" class="limit-sequence"></div>' +
+              '<div id="' + p + '-weight-preview" class="limit-preview"></div></div>' +
+            '<div class="density-block"><div class="density-block__head">' +
+              '<h3 class="density-block__title">Valores de densidad</h3>' +
+              '<span class="density-block__unit">Ingresar un valor entre 1 y 9 en cada celda</span></div>' +
+            '<div class="density-legend"><div class="density-legend__title">Consideraciones para el armado de tarima</div><ul>' +
+              '<li><strong>Base obligatoria:</strong> densidades 1 y 2</li>' +
+              '<li><strong>Base recomendada:</strong> densidades 3, 4 y 5</li>' +
+              '<li><strong>Cuerpo:</strong> densidades 6 y 7</li>' +
+              '<li><strong>Relleno y cima:</strong> densidades 8 y 9</li>' +
+            '</ul></div>' +
+              '<div class="density-grid-wrap"><div id="' + p + '-density-grid" class="density-grid"></div></div></div>' +
+          '</section>';
+        this.renderAll();
+      };
+
+      DensityMatrixForm.prototype.applyCategories = function (axis, data) {
+        var cats = axis === 'volume' ? this.volume : this.weight;
+        var src = data || [];
+        cats.forEach(function (cat) {
+          var found = src.find(function (s) { return s.id === cat.id; });
+          if (found) cat.max = found.max;
+        });
+      };
+
+      DensityMatrixForm.prototype.loadData = function (record) {
+        if (!record) return;
+        document.getElementById(this.prefix + '-id').value = record.id || '';
+        document.getElementById(this.prefix + '-nombre').value = record.nombre || '';
+        this.applyCategories('volume', record.volume);
+        this.applyCategories('weight', record.weight);
+        if (record.density) this.density = cloneDeep(record.density);
+        if (this.prefix === 'detail') {
+          document.getElementById('detail-updatedBy').textContent = record.updatedBy || '—';
+          document.getElementById('detail-updatedAt').textContent = formatDateTime(record.updatedAt);
+          document.getElementById('detail-createdAt').textContent = formatDateTime(record.createdAt);
+        }
+        this.renderAll();
+      };
+
+      DensityMatrixForm.prototype.getCategories = function (axis) {
+        return axis === 'volume' ? this.volume : this.weight;
+      };
+
+      DensityMatrixForm.prototype.el = function (id) {
+        return document.getElementById(this.prefix + '-' + id);
+      };
+
+      DensityMatrixForm.prototype.parseLimitValue = function (str) {
+        if (!str || str.trim() === '') return null;
+        if (/^infinito$/i.test(str.trim())) return Infinity;
+        if (!LIMIT_FORMAT.test(str.trim())) return null;
+        return Number(str.trim());
+      };
+
+      DensityMatrixForm.prototype.formatLimitValue = function (num) {
+        if (num === Infinity || num === null || isNaN(num)) return 'Infinito';
+        return num.toFixed(3);
+      };
+
+      DensityMatrixForm.prototype.getEffectiveMin = function (categories, index) {
+        if (index === 0) return 0;
+        return this.parseLimitValue(categories[index - 1].max);
+      };
+
+      DensityMatrixForm.prototype.getMinDisplay = function (categories, index) {
+        if (index === 0) return '0.000';
+        var parsed = this.parseLimitValue(categories[index - 1].max);
+        if (parsed === null) return '—';
+        return 'Mayor a ' + this.formatLimitValue(parsed);
+      };
+
+      DensityMatrixForm.prototype.validateLimitRow = function (categories, index, rawValue) {
+        var cat = categories[index];
+        if (cat.maxFixed) return { valid: true, message: '' };
+        var valueStr = rawValue !== undefined ? rawValue : cat.max;
+        if (!valueStr || !LIMIT_FORMAT.test(String(valueStr).trim())) {
+          return { valid: false, message: 'Formato inválido. Use hasta 7 enteros y 3 decimales.' };
+        }
+        var value = this.parseLimitValue(valueStr);
+        var minEff = this.getEffectiveMin(categories, index);
+        if (value <= minEff) {
+          return { valid: false, message: 'El máximo debe ser mayor que ' + this.formatLimitValue(minEff) + '.' };
+        }
+        return { valid: true, message: '' };
+      };
+
+      DensityMatrixForm.prototype.refreshLimitAxis = function (axis) {
+        var self = this;
+        var categories = this.getCategories(axis);
+        categories.forEach(function (cat, index) {
+          var minEl = self.el('min-' + axis + '-' + cat.id);
+          if (minEl) minEl.textContent = self.getMinDisplay(categories, index);
+          if (cat.maxFixed) return;
+          var input = self.el('max-' + axis + '-' + cat.id);
+          var result = self.validateLimitRow(categories, index, input ? input.value : cat.max);
+          var row = self.el('row-' + axis + '-' + cat.id);
+          var err = self.el('err-' + axis + '-' + cat.id);
+          if (row) row.classList.toggle('invalid', !result.valid);
+          if (input) input.classList.toggle('invalid', !result.valid);
+          if (err) { err.textContent = result.message; err.hidden = result.valid; }
+        });
+        this.updatePreview(axis);
+      };
+
+      DensityMatrixForm.prototype.buildLimitPreviewHtml = function (axis) {
+        var categories = this.getCategories(axis);
+        var unit = axis === 'volume' ? VOLUME_UNIT : 'kg';
+        var axisLabel = axis === 'volume' ? 'volumen' : 'peso';
+        var hasError = false;
+        var self = this;
+        var items = categories.map(function (cat, index) {
+          var maxText;
+          if (cat.maxFixed) {
+            maxText = 'en adelante (sin tope)';
+          } else {
+            var input = self.el('max-' + axis + '-' + cat.id);
+            var maxRaw = input ? input.value : cat.max;
+            if (!self.validateLimitRow(categories, index, maxRaw).valid) hasError = true;
+            var parsed = self.parseLimitValue(maxRaw);
+            maxText = parsed === null ? '?' : ('hasta ' + self.formatLimitValue(parsed) + ' ' + unit);
+          }
+          var fromText = index === 0
+            ? 'desde 0.000 ' + unit
+            : (function () {
+                var prev = self.parseLimitValue(categories[index - 1].max);
+                return prev === null ? 'desde ?' : ('desde más de ' + self.formatLimitValue(prev) + ' ' + unit);
+              })();
+          return '<li class="limit-preview__item"><strong>' + cat.label + ':</strong> <span>' + fromText + ' ' + maxText + '</span></li>';
+        });
+        return {
+          hasError: hasError,
+          html: '<div class="limit-preview__title">Resumen de categorías por ' + axisLabel + '</div>' +
+            '<ul class="limit-preview__list">' + items.join('') + '</ul>'
+        };
+      };
+
+      DensityMatrixForm.prototype.updatePreview = function (axis) {
+        var preview = this.el(axis + '-preview');
+        if (!preview) return;
+        var summary = this.buildLimitPreviewHtml(axis);
+        preview.innerHTML = summary.html;
+        preview.classList.toggle('invalid', summary.hasError);
+      };
+
+      DensityMatrixForm.prototype.renderLimitSequence = function (axis) {
+        var self = this;
+        var container = this.el(axis + '-limits');
+        if (!container) return;
+        var categories = this.getCategories(axis);
+        var readonly = this.mode === 'readonly';
+        container.innerHTML = '';
+        var head = document.createElement('div');
+        head.className = 'limit-sequence__head';
+        head.innerHTML = '<span>Categoría</span><span>Rango mínimo</span><span>Máximo</span>';
+        container.appendChild(head);
+        categories.forEach(function (cat, index) {
+          var row = document.createElement('div');
+          row.className = 'limit-row';
+          row.id = self.prefix + '-row-' + axis + '-' + cat.id;
+          row.innerHTML =
+            '<div class="limit-row__label"><span class="limit-row__badge matrix-badge">' + cat.index + '</span><span>' + cat.label + '</span></div>' +
+            '<div class="limit-row__min" id="' + self.prefix + '-min-' + axis + '-' + cat.id + '"></div>' +
+            '<div class="limit-row__max"><div class="limit-row__max-field">' +
+              '<input type="text" class="form-input' + (readonly || cat.maxFixed ? '' : ' is-interactive') + '" id="' + self.prefix + '-max-' + axis + '-' + cat.id + '" value="' + cat.max + '" ' + (readonly || cat.maxFixed ? 'readonly' : '') + ' inputmode="decimal">' +
+              '<span class="limit-row__unit">' + (cat.maxFixed ? '' : (axis === 'volume' ? VOLUME_UNIT : 'kg')) + '</span>' +
+            '</div><div class="limit-row__error" id="' + self.prefix + '-err-' + axis + '-' + cat.id + '" hidden></div></div>';
+          container.appendChild(row);
+          if (!readonly && !cat.maxFixed) {
+            var input = self.el('max-' + axis + '-' + cat.id);
+            input.addEventListener('input', function () {
+              cat.max = input.value.trim();
+              self.refreshLimitAxis(axis);
+            });
+            input.addEventListener('blur', function () {
+              if (LIMIT_FORMAT.test(input.value.trim())) {
+                var n = self.parseLimitValue(input.value.trim());
+                if (n !== null) { input.value = self.formatLimitValue(n); cat.max = input.value; }
+              }
+              self.refreshLimitAxis(axis);
+            });
+          }
+        });
+        this.refreshLimitAxis(axis);
+      };
+
+      DensityMatrixForm.prototype.renderDensityGrid = function () {
+        var self = this;
+        var grid = this.el('density-grid');
+        if (!grid) return;
+        var readonly = this.mode === 'readonly';
+        grid.innerHTML = '';
+        var corner = document.createElement('div');
+        corner.className = 'density-grid__corner';
+        corner.textContent = 'Peso \\ Volumen';
+        grid.appendChild(corner);
+        this.volume.forEach(function (vol) {
+          var h = document.createElement('div');
+          h.className = 'density-grid__col-head';
+          h.innerHTML = densityGridHeadLabel(vol.label, vol.index);
+          grid.appendChild(h);
+        });
+        this.weight.forEach(function (weight, ri) {
+          var rh = document.createElement('div');
+          rh.className = 'density-grid__row-head';
+          rh.innerHTML = densityGridHeadLabel(weight.label, weight.index);
+          grid.appendChild(rh);
+          self.volume.forEach(function (vol, ci) {
+            var cell = document.createElement('div');
+            cell.className = 'density-grid__cell';
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1'; input.max = '9'; input.step = '1';
+            input.className = 'form-input' + (readonly ? '' : ' is-interactive');
+            input.value = self.density[ri][ci];
+            input.id = self.prefix + '-density-' + ri + '-' + ci;
+            if (readonly) input.readOnly = true;
+            if (!readonly) {
+              input.addEventListener('input', function () {
+                input.classList.toggle('invalid', input.value !== '' && (Number(input.value) < 1 || Number(input.value) > 9));
+              });
+              input.addEventListener('blur', function () {
+                if (input.value === '') return;
+                var n = Math.max(1, Math.min(9, Math.round(Number(input.value))));
+                if (!isNaN(n)) { input.value = n; self.density[ri][ci] = n; }
+                input.classList.remove('invalid');
+              });
+            }
+            cell.appendChild(input);
+            grid.appendChild(cell);
+          });
+        });
+      };
+
+      DensityMatrixForm.prototype.renderAll = function () {
+        this.renderLimitSequence('volume');
+        this.renderLimitSequence('weight');
+        this.renderDensityGrid();
+        this.refreshLimitAxis('volume');
+        this.refreshLimitAxis('weight');
+      };
+
+      DensityMatrixForm.prototype.validateHeader = function (excludeId) {
+        var idEl = this.el('id');
+        var nomEl = this.el('nombre');
+        var idErr = this.el('id-error');
+        var nomErr = this.el('nombre-error');
+        var valid = true;
+        var id = idEl.value.trim();
+        var nom = nomEl.value.trim();
+        idErr.hidden = true; nomErr.hidden = true;
+        idEl.classList.remove('invalid'); nomEl.classList.remove('invalid');
+        if (!id) { idErr.textContent = 'El identificador es obligatorio.'; idErr.hidden = false; idEl.classList.add('invalid'); valid = false; }
+        else if (!ID_FORMAT.test(id)) { idErr.textContent = 'Use hasta 50 caracteres alfanuméricos, guión o guion bajo.'; idErr.hidden = false; idEl.classList.add('invalid'); valid = false; }
+        else if (Store.idExists(id, excludeId || '')) { idErr.textContent = 'El identificador ya existe en el sitio.'; idErr.hidden = false; idEl.classList.add('invalid'); valid = false; }
+        if (!nom) { nomErr.textContent = 'El nombre es obligatorio.'; nomErr.hidden = false; nomEl.classList.add('invalid'); valid = false; }
+        else if (nom.length > 50) { nomErr.textContent = 'Máximo 50 caracteres.'; nomErr.hidden = false; nomEl.classList.add('invalid'); valid = false; }
+        return valid;
+      };
+
+      DensityMatrixForm.prototype.validateMatrix = function () {
+        var self = this;
+        var ok = true;
+        ['volume', 'weight'].forEach(function (axis) {
+          var cats = self.getCategories(axis);
+          cats.forEach(function (cat, i) {
+            if (cat.maxFixed) return;
+            var input = self.el('max-' + axis + '-' + cat.id);
+            var res = self.validateLimitRow(cats, i, input ? input.value : cat.max);
+            if (!res.valid) ok = false;
+          });
+          self.refreshLimitAxis(axis);
+        });
+        for (var r = 0; r < 5; r++) {
+          for (var c = 0; c < 5; c++) {
+            var inp = this.el('density-' + r + '-' + c);
+            if (!inp || inp.value === '' || Number(inp.value) < 1 || Number(inp.value) > 9) {
+              if (inp) inp.classList.add('invalid');
+              ok = false;
+            }
+          }
+        }
+        return ok;
+      };
+
+      DensityMatrixForm.prototype.getValues = function () {
+        var self = this;
+        for (var r = 0; r < 5; r++) {
+          for (var c = 0; c < 5; c++) {
+            var inp = this.el('density-' + r + '-' + c);
+            if (inp) this.density[r][c] = Number(inp.value);
+          }
+        }
+        return {
+          id: this.el('id').value.trim(),
+          nombre: this.el('nombre').value.trim(),
+          volume: this.volume.map(function (c) { return { id: c.id, max: c.max }; }),
+          weight: this.weight.map(function (c) { return { id: c.id, max: c.max }; }),
+          density: cloneDeep(this.density)
+        };
+      };
+
+      DensityMatrixForm.prototype.reset = function () {
+        this.volume = cloneDeep(VOLUME_DEF);
+        this.weight = cloneDeep(WEIGHT_DEF);
+        this.density = cloneDeep(DENSITY_DEFAULT);
+        if (this.el('id')) this.el('id').value = '';
+        if (this.el('nombre')) this.el('nombre').value = '';
+        this.renderAll();
+      };
+
+      /* ---- List ---- */
+      function getFilteredRecords() {
+        return Store.getActive().filter(function (row) {
+          return COLUMNS.every(function (col) {
+            var f = (listState.filters[col.key] || '').trim().toLowerCase();
+            if (!f) return true;
+            var val = col.key === 'updatedAt' || col.key === 'createdAt'
+              ? formatDateTime(row[col.key]).toLowerCase()
+              : String(row[col.key] || '').toLowerCase();
+            return val.indexOf(f) !== -1;
+          });
+        });
+      }
+
+      function renderList() {
+        var filtered = getFilteredRecords();
+        var totalPages = Math.max(1, Math.ceil(filtered.length / listState.pageSize));
+        if (listState.page > totalPages) listState.page = totalPages;
+        var start = (listState.page - 1) * listState.pageSize;
+        var pageRows = filtered.slice(start, start + listState.pageSize);
+
+        var head = document.getElementById('listTableHead');
+        var filterRow = document.getElementById('listTableFilterRow');
+        head.innerHTML = '';
+        filterRow.innerHTML = '';
+        COLUMNS.forEach(function (col) {
+          if (!col.visible) return;
+          var th = document.createElement('th');
+          th.textContent = col.label;
+          th.dataset.col = col.key;
+          head.appendChild(th);
+          var fth = document.createElement('th');
+          var inp = document.createElement('input');
+          inp.type = 'text';
+          inp.className = 'table-filter-input';
+          inp.placeholder = 'Buscar…';
+          inp.value = listState.filters[col.key] || '';
+          inp.dataset.filter = col.key;
+          inp.addEventListener('input', function () {
+            listState.filters[col.key] = inp.value;
+            listState.page = 1;
+            renderList();
+          });
+          fth.appendChild(inp);
+          filterRow.appendChild(fth);
+        });
+        var actH = document.createElement('th');
+        actH.textContent = 'Acciones';
+        actH.className = 'col-actions';
+        head.appendChild(actH);
+        var actF = document.createElement('th');
+        actF.className = 'col-actions filter-cell';
+        filterRow.appendChild(actF);
+
+        var body = document.getElementById('listTableBody');
+        body.innerHTML = '';
+        if (!pageRows.length) {
+          var tr = document.createElement('tr');
+          var td = document.createElement('td');
+          td.colSpan = COLUMNS.filter(function (c) { return c.visible; }).length + 1;
+          td.textContent = 'No hay registros para mostrar.';
+          td.style.textAlign = 'center';
+          td.style.padding = '2rem';
+          tr.appendChild(td);
+          body.appendChild(tr);
+        } else {
+          pageRows.forEach(function (row) {
+            var tr = document.createElement('tr');
+            COLUMNS.forEach(function (col) {
+              if (!col.visible) return;
+              var td = document.createElement('td');
+              td.textContent = col.key === 'updatedAt' || col.key === 'createdAt'
+                ? formatDateTime(row[col.key]) : row[col.key];
+              tr.appendChild(td);
+            });
+            var actTd = document.createElement('td');
+            actTd.className = 'col-actions';
+            actTd.innerHTML =
+              '<div class="row-actions">' +
+                '<button type="button" class="table-action-btn" data-action="edit" data-id="' + row.id + '" title="Editar" aria-label="Editar"><i class="pi pi-pencil"></i></button>' +
+                '<button type="button" class="table-action-btn" data-action="detail" data-id="' + row.id + '" title="Ver detalle" aria-label="Ver detalle"><i class="pi pi-eye"></i></button>' +
+                '<button type="button" class="table-action-btn table-action-btn--danger" data-action="delete" data-id="' + row.id + '" title="Eliminar" aria-label="Eliminar"><i class="pi pi-trash"></i></button>' +
+              '</div>';
+            tr.appendChild(actTd);
+            body.appendChild(tr);
+          });
+        }
+
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        document.getElementById('pagFirst').disabled = listState.page <= 1;
+        document.getElementById('pagPrev').disabled = listState.page <= 1;
+        document.getElementById('pagNext').disabled = listState.page >= totalPages;
+        document.getElementById('pagLast').disabled = listState.page >= totalPages;
+        var pages = document.getElementById('pagPages');
+        pages.innerHTML = '';
+        for (var i = 1; i <= totalPages; i++) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'table-pag-btn' + (i === listState.page ? ' is-active' : '');
+          btn.textContent = i;
+          btn.addEventListener('click', (function (p) {
+            return function () { listState.page = p; renderList(); };
+          })(i));
+          pages.appendChild(btn);
+        }
+      }
+
+      function buildColumnPicker() {
+        var panel = document.getElementById('columnPickerPanel');
+        panel.innerHTML = '<div class="column-picker__title">Columnas visibles</div>';
+        COLUMNS.forEach(function (col) {
+          var label = document.createElement('label');
+          label.className = 'column-picker__item';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = col.visible;
+          cb.addEventListener('change', function () {
+            col.visible = cb.checked;
+            renderList();
+          });
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(col.label));
+          panel.appendChild(label);
+        });
+      }
+
+      function buildExportFormats() {
+        var list = document.getElementById('exportFormatList');
+        list.innerHTML = '';
+        EXPORT_FORMATS.forEach(function (fmt) {
+          var label = document.createElement('label');
+          var radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'exportFormat';
+          radio.value = fmt.id;
+          radio.checked = fmt.id === selectedExportFormat;
+          radio.addEventListener('change', function () { selectedExportFormat = fmt.id; });
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(fmt.label));
+          list.appendChild(label);
+        });
+      }
+
+      function exportRecords(format) {
+        var rows = getFilteredRecords();
+        var headers = COLUMNS.filter(function (c) { return c.visible; }).map(function (c) { return c.label; });
+        var keys = COLUMNS.filter(function (c) { return c.visible; }).map(function (c) { return c.key; });
+        var lines = rows.map(function (r) {
+          return keys.map(function (k) {
+            return k === 'updatedAt' || k === 'createdAt' ? formatDateTime(r[k]) : r[k];
+          });
+        });
+        var filename = 'matrices-densidad';
+        var blob, mime;
+        if (format === 'csv' || format === 'xls' || format === 'xlsx') {
+          var csv = [headers.join(',')].concat(lines.map(function (l) {
+            return l.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+          })).join('\n');
+          blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+          filename += format === 'xlsx' ? '.xlsx' : (format === 'xls' ? '.xls' : '.csv');
+          mime = blob;
+        } else if (format === 'html') {
+          var html = '<html><head><meta charset="utf-8"><title>Matrices de densidad</title></head><body><table border="1"><thead><tr>' +
+            headers.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+            lines.map(function (l) { return '<tr>' + l.map(function (v) { return '<td>' + v + '</td>'; }).join('') + '</tr>'; }).join('') +
+            '</tbody></table></body></html>';
+          blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          filename += '.html';
+        } else if (format === 'text') {
+          var txt = [headers.join('\t')].concat(lines.map(function (l) { return l.join('\t'); })).join('\n');
+          blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+          filename += '.txt';
+        } else {
+          var pdfTxt = 'Matrices de densidad\n\n' + [headers.join(' | ')].concat(lines.map(function (l) { return l.join(' | '); })).join('\n');
+          blob = new Blob([pdfTxt], { type: 'application/pdf' });
+          filename += '.pdf';
+        }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function initMatrixForms() {
+        matrixInstances.create = new DensityMatrixForm('create', 'edit');
+        matrixInstances.create.mount(document.getElementById('createFormRoot'), {});
+
+        matrixInstances.edit = new DensityMatrixForm('edit', 'edit');
+        matrixInstances.edit.mount(document.getElementById('editFormRoot'), { idReadonly: true });
+
+        matrixInstances.detail = new DensityMatrixForm('detail', 'readonly');
+        matrixInstances.detail.mount(document.getElementById('detailFormRoot'), { showMeta: true });
+      }
+
+      function openCreate() {
+        matrixInstances.create.reset();
+        showView('create');
+      }
+
+      function openEdit(id) {
+        var rec = Store.getById(id);
+        if (!rec) return;
+        editingId = id;
+        matrixInstances.edit.reset();
+        matrixInstances.edit.loadData(rec);
+        document.getElementById('editPageTitle').textContent = 'Actualizar matriz ' + id;
+        document.getElementById('editBreadcrumbCurrent').textContent = 'Actualizar matriz ' + id;
+        showView('edit');
+      }
+
+      function openDetail(id) {
+        var rec = Store.getById(id);
+        if (!rec) return;
+        matrixInstances.detail.loadData(rec);
+        document.getElementById('detailPageTitle').textContent = 'Detalle de matriz ' + id;
+        document.getElementById('detailBreadcrumbCurrent').textContent = 'Detalle de matriz ' + id;
+        showView('detail');
+      }
+
+      function submitCreate() {
+        var form = matrixInstances.create;
+        if (!form.validateHeader() || !form.validateMatrix()) return;
+        var values = form.getValues();
+        var now = new Date().toISOString();
+        Store.create({
+          id: values.id,
+          nombre: values.nombre,
+          volume: values.volume,
+          weight: values.weight,
+          density: values.density,
+          updatedBy: CURRENT_USER,
+          updatedAt: now,
+          createdAt: now,
+          deleted: false,
+          auditLog: [{ action: 'CREATE', user: CURRENT_USER, at: now }]
+        });
+        showToast('MSG001: La matriz de densidad se creó correctamente.');
+        showView('list');
+      }
+
+      function submitEdit() {
+        var form = matrixInstances.edit;
+        if (!form.validateHeader(editingId) || !form.validateMatrix()) return;
+        var values = form.getValues();
+        var now = new Date().toISOString();
+        var rec = Store.getById(editingId);
+        var log = rec && rec.auditLog ? rec.auditLog.slice() : [];
+        log.push({ action: 'UPDATE', user: CURRENT_USER, at: now });
+        Store.update(editingId, {
+          nombre: values.nombre,
+          volume: values.volume,
+          weight: values.weight,
+          density: values.density,
+          updatedBy: CURRENT_USER,
+          updatedAt: now,
+          auditLog: log
+        });
+        showToast('MSG002: La matriz de densidad se actualizó correctamente.');
+        editingId = null;
+        showView('list');
+      }
+
+      /* ---- Events ---- */
+      document.getElementById('goCreateBtn').addEventListener('click', openCreate);
+      document.getElementById('createSubmitBtn').addEventListener('click', submitCreate);
+      document.getElementById('editSubmitBtn').addEventListener('click', submitEdit);
+
+      document.querySelectorAll('[data-nav="list"]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          editingId = null;
+          showView('list');
+        });
+      });
+
+      document.getElementById('listTableBody').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var id = btn.dataset.id;
+        if (btn.dataset.action === 'edit') openEdit(id);
+        else if (btn.dataset.action === 'detail') openDetail(id);
+        else if (btn.dataset.action === 'delete') {
+          deletingId = id;
+          document.getElementById('deleteModal').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('deleteCancelBtn').addEventListener('click', function () {
+        deletingId = null;
+        document.getElementById('deleteModal').classList.add('hidden');
+      });
+      document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
+        if (deletingId) Store.softDelete(deletingId);
+        deletingId = null;
+        document.getElementById('deleteModal').classList.add('hidden');
+        showToast('MSG005: La matriz de densidad se eliminó correctamente.');
+        renderList();
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', function () {
+        buildExportFormats();
+        document.getElementById('exportModal').classList.remove('hidden');
+      });
+      document.getElementById('exportCancelBtn').addEventListener('click', function () {
+        document.getElementById('exportModal').classList.add('hidden');
+      });
+      document.getElementById('exportConfirmBtn').addEventListener('click', function () {
+        var sel = document.querySelector('input[name="exportFormat"]:checked');
+        exportRecords(sel ? sel.value : 'csv');
+        document.getElementById('exportModal').classList.add('hidden');
+      });
+
+      document.getElementById('columnToggleBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        var panel = document.getElementById('columnPickerPanel');
+        var willOpen = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+        document.getElementById('columnToggleBtn').setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.column-picker')) {
+          document.getElementById('columnPickerPanel').classList.add('hidden');
+        }
+      });
+
+      document.getElementById('pageSizeSelect').addEventListener('change', function () {
+        listState.pageSize = Number(this.value);
+        listState.page = 1;
+        renderList();
+      });
+      document.getElementById('pagFirst').addEventListener('click', function () { listState.page = 1; renderList(); });
+      document.getElementById('pagPrev').addEventListener('click', function () { listState.page--; renderList(); });
+      document.getElementById('pagNext').addEventListener('click', function () { listState.page++; renderList(); });
+      document.getElementById('pagLast').addEventListener('click', function () {
+        listState.page = Math.ceil(getFilteredRecords().length / listState.pageSize) || 1;
+        renderList();
+      });
+
+      initMatrixForms();
+      buildColumnPicker();
+      Store.load();
+      renderList();
+    })();
+  </script>
+</body>
+</html>
